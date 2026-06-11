@@ -12,6 +12,18 @@ const App = () => {
   const [users, setUsers] = useState<User[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+
+  const deleteUser = (user: User) => {
+    setUsers(users.filter(u => u.id !== user.id ))
+    axios.delete('https://jsonfakery.com/uber/' + user.id)
+         .then(response => {
+            console.log(response.data)
+         })
+         .catch(error => {
+            console.log('errors', console.log(error.message))
+         })
+  }
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -31,22 +43,26 @@ const App = () => {
   }, [])
 
   return (
-  <div className='flex flex-col items-center p-4 text-center'>
-    <h1 className='text-3xl mb-4'>List of Names</h1>
-    {error && <p className='text-red-500'>{error}</p>}
+  <div className='max-w-lg mx-auto p-6'>
+    <h1 className='text-3xl font-semibold mb-6'>List of Names</h1>
+    {error && <p className='text-red-500 mb-4'>{error}</p>}
     {loading && (
-      <svg className='animate-spin h-8 w-8 text-blue-500' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
-        <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z' />
-      </svg>
+      <div className='flex justify-center'>
+        <svg className='animate-spin h-8 w-8 text-blue-500' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
+          <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+          <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z' />
+        </svg>
+      </div>
     )}
-    <ul>
-      {users.map(user => 
-      <li key={user.id}>
-        <p className='mb-2'>{user.first_name} {user.middle_name}</p>
-      </li>
-      )
-      }
+    <ul className='divide-y divide-gray-200'>
+      {users.map(user => (
+        <li key={user.id} className='flex items-center justify-between py-3'>
+          <span>{user.first_name} {user.middle_name} {user.last_name}</span>
+          <button className='bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm' onClick={() => deleteUser(user)}>
+            Delete
+          </button>
+        </li>
+      ))}
     </ul>
   </div>
   )
