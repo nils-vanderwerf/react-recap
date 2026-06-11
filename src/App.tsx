@@ -21,11 +21,21 @@ const App = () => {
 
   const addUser = (e: React.SyntheticEvent) => {
     e.preventDefault()
+
+    const originalUsers = users
+    // Use a temp id until the server responds with the real one
+    const newUser = { ...form, id: Date.now().toString() }
+    setUsers([newUser, ...users])
+
     setSubmitting(true)
     axios.post<User>('https://jsonfakery.com/users', form)
-      // Prepend the new user to the top of the list
-      .then(response => setUsers([response.data, ...users]))
-      .catch(error => setError(error.message))
+      // Swap the temp user out for the real server response (with the real id)
+      .then(response => setUsers(current => current.map(u => u.id === newUser.id ? response.data : u)))
+      .catch(error => {
+        setError(error.message)
+        // Roll back to the original list if the request failed
+        setUsers(originalUsers)
+      })
       .finally(() => {
         setSubmitting(false)
         setForm(emptyForm)
